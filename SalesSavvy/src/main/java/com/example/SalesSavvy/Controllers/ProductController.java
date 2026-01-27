@@ -1,0 +1,67 @@
+package com.example.SalesSavvy.Controllers;
+
+
+import com.example.SalesSavvy.Entities.Product;
+import com.example.SalesSavvy.Entities.User;
+import com.example.SalesSavvy.ServiceImpIemetations.ProductService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@CrossOrigin(origins = "http://localhost.3000",allowCredentials = "true")
+@RequestMapping("/api/products")
+public class ProductController {
+    @Autowired
+    private ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
+
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getProducts(@RequestParam(required = false) String category, HttpServletRequest request){
+        try {
+            User authenticatedUser=(User) request.getAttribute("authenticatedUser");
+            if(authenticatedUser == null){
+                return ResponseEntity.
+                        status(401).
+                        body(Map.of("error","Unauthorized access"));
+            }
+            List<Product> products=productService.getProductsByCategory(category);
+            
+            Map<String,Object> response =new HashMap<>();
+            Map<String,String> userInfo=new HashMap<>();
+            userInfo.put("name", authenticatedUser.getUsername());
+            userInfo.put("role",authenticatedUser.getRole().name());
+            response.put("user",userInfo);
+
+            //Add products details
+            List<Map<String,Object>> productList = new ArrayList<>();
+            for(Product product:products){
+                Map<String,Object> productDetails= new HashMap<>();
+                productDetails.put("product_id", product.getProductId());
+                productDetails.put("name",product.getName());
+                productDetails.put("description",product.getDescription());
+                productDetails.put("price",product.getPrice());
+                productDetails.put("stock",product.getStock());
+
+                // Fetch product Images
+                List<String> images=productService.getProductImages(product.getProductId());
+                productDetails.put("images",images);
+                productList.add(productDetails);
+            }
+            response.put("products",productList);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e){
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error",e.getMessage()));
+        }
+    }
+}
