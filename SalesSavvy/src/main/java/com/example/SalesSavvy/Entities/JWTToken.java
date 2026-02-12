@@ -12,7 +12,7 @@ public class JWTToken {
     @Column(name = "token_id")
     private int tokenId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String token;
 
     @ManyToOne

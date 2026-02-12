@@ -3,7 +3,7 @@ package com.example.SalesSavvy.Controllers;
 
 import com.example.SalesSavvy.Entities.Product;
 import com.example.SalesSavvy.Entities.User;
-import com.example.SalesSavvy.ServiceImpIemetations.ProductService;
+import com.example.SalesSavvy.Service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "http://localhost.3000",allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost.5174",allowCredentials = "true")
 @RequestMapping("/api/products")
 public class ProductController {
     @Autowired
+
     private ProductService productService;
 
     public ProductController(ProductService productService) {

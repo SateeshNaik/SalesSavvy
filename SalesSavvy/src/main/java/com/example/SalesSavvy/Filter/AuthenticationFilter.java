@@ -4,7 +4,7 @@ package com.example.SalesSavvy.Filter;
 import com.example.SalesSavvy.Entities.Role;
 import com.example.SalesSavvy.Entities.User;
 import com.example.SalesSavvy.Repositories.UserRepository;
-import com.example.SalesSavvy.ServiceImpIemetations.AuthService;
+import com.example.SalesSavvy.Service.AuthService;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.Cookie;
@@ -14,12 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.sql.rowset.serial.SerialException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 
-@WebFilter(urlPatterns = {"/api/*","/admin/*"})
+//@WebFilter(urlPatterns = {"/api/*","/admin/*"})
 @Component
 public class AuthenticationFilter implements  Filter{
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
@@ -41,7 +40,7 @@ public class AuthenticationFilter implements  Filter{
         try {
             excuteFilterLogic(request,response,chain);
         } catch (Exception e){
-            logger.error("Unexcpetcted error in AuthenticatedFilter",e);
+            logger.error("Unexpected error in AuthenticatedFilter",e);
             sendErrorResponse((HttpServletResponse) response,HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"internal server error");
         }
     }
@@ -51,9 +50,8 @@ public class AuthenticationFilter implements  Filter{
         HttpServletRequest httpRequest=(HttpServletRequest) request;
         HttpServletResponse httpResponse= (HttpServletResponse) response;
 
-        String requestURI=httpRequest.getRequestURI();
+        String requestURI = httpRequest.getRequestURI().trim();
         logger.info("Request URI:{}",requestURI);
-
 
         //Allow unauthenticated paths
         if(Arrays.asList(UNAUTHENTICATED_PATHS).contains(requestURI)){
@@ -91,22 +89,22 @@ public class AuthenticationFilter implements  Filter{
 
 
 
-        //Role-baesd access control
+        //Role-based access control
         if(requestURI.startsWith("/admin") && role !=Role.ADMIN){
-            sendErrorResponse(httpResponse,HttpServletResponse.SC_FORBIDDEN,"Forbidden: Admin access requried");
+            sendErrorResponse(httpResponse,HttpServletResponse.SC_FORBIDDEN,"Forbidden: Admin access required");
             return;
         }
 
-        //Attach user detailsto request
+        //Attach user details to request
         httpRequest.setAttribute("authenticatedUser", authenticatedUser);
         chain.doFilter(request, response);
 
     }
     private void setCORSHeaders(HttpServletResponse response){
         response.setHeader("Access-Control-Allow-Origin", ALLOWED_ORGIN);
-        response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-        response.setHeader("Access-Control-Allow-Header", "Content-Type, Authorization");
-        response.setHeader("Access-Control-Allow-credentials", "true");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setStatus(HttpServletResponse.SC_OK);
     }
 
@@ -128,9 +126,5 @@ public class AuthenticationFilter implements  Filter{
         System.out.println("Cookies: " + Arrays.toString(request.getCookies()));
         return null;
     }
-
-
-
-
 
 }

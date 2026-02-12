@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -28,6 +29,9 @@ public class Product {
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
     private  LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<ProductImages> productImages;
 
     public Product() {
     }
